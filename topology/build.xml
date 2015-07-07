@@ -1,0 +1,54 @@
+<project name="splexpeval" default="jar" basedir=".">
+    <property environment="env"/>
+    <fail unless="env.STREAMS_INSTALL" message="STREAMS_INSTALL not set."/>
+    <property name="streams.install" value="${env.STREAMS_INSTALL}"/>
+    <property name="tk.lib" location="${user.home}/streamsx.topology/com.ibm.streamsx.topology/lib"/>
+
+    <property name="classes" location="classes"/>
+    <property name="lib" location="lib"/>
+    <property name="jarname" value="lib/streamsx.demo.logwatch.topology.jar"/>
+
+    <path id="compile.classpath">
+        <pathelement location="${tk.lib}/com.ibm.streamsx.topology.jar" />
+        <pathelement location="${streams.install}/lib/com.ibm.streams.operator.samples.jar" />
+    </path>
+
+    <path id="run.classpath">
+        <pathelement location="${jarname}" />
+        <path refid="compile.classpath"/>
+    </path>
+
+    <target name="all" depends="jar"/>
+
+    <target name="init">
+        <mkdir dir="${classes}"/>
+        <mkdir dir="${lib}"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <javac debug="true" 
+           srcdir="${basedir}/src" 
+           destdir="${classes}"
+           classpathref="compile.classpath"
+           includeantruntime="no"
+        />
+    </target>
+    <target name="jar" depends="compile">
+        <jar destfile="${jarname}" basedir="${classes}"/>
+    </target>
+
+    <target name="run" depends="jar">
+        <java classname="streamsx.demo.logwatch.topology.LogWatch" classpathref="run.classpath" fork="yes">
+            <arg value="STANDALONE"/>
+            <arg value="/homes/hny7/scoschne/JavaLogWatch/data/messages_head"/>
+            <arg value="/homes/hny7/scoschne/JavaLogWatch/data/suspects.txt"/>
+        </java>
+    </target>
+ 
+    <target name="clean" >
+        <delete dir="${classes}"/>
+        <delete dir="${lib}"/>
+        <delete file="${jarname}"/>
+        <delete file="streamsx.demo.logwatch.topology.LogWatch.sab"/>
+    </target>
+</project>
