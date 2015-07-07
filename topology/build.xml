@@ -1,4 +1,4 @@
-<project name="splexpeval" default="jar" basedir=".">
+<project name="streamsx.demo.logwatch.topology" default="jar" basedir=".">
     <property environment="env"/>
     <fail unless="env.STREAMS_INSTALL" message="STREAMS_INSTALL not set."/>
     <property name="streams.install" value="${env.STREAMS_INSTALL}"/>
