@@ -40,8 +40,8 @@
     <target name="run" depends="jar">
         <java classname="streamsx.demo.logwatch.topology.LogWatch" classpathref="run.classpath" fork="yes">
             <arg value="STANDALONE"/>
-            <arg value="/homes/hny7/scoschne/JavaLogWatch/data/messages_head"/>
-            <arg value="/homes/hny7/scoschne/JavaLogWatch/data/suspects.txt"/>
+            <arg value="${user.dir}/data/messages_head"/>
+            <arg value="${user.dir}/data/suspects.txt"/>
         </java>
     </target>
  
