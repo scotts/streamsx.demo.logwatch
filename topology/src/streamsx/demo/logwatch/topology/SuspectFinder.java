@@ -13,16 +13,19 @@ public class SuspectFinder {
         return failures.last(attempts)
                        .aggregate(new Function<List<Failure>, Suspect>() {
                            @Override
-                           public Suspect apply(List<Failure> tuples) {
-                               Date min = Collections.min(tuples).time;
-                               Date max = Collections.max(tuples).time;
+                           public Suspect apply(List<Failure> window) {
+                               if (window.size() < attempts) { // the window contains UP TO 'attempts', but it can contain less
+                                   return null;
+                               }
+                               Date min = Collections.min(window).time;
+                               Date max = Collections.max(window).time;
                                long diff = max.getTime() - min.getTime();
 
-                               if (diff >= (seconds * 1000)) {
+                               if (diff >= (seconds * 1000)) { // diff is in milliseconds
                                    return null;
                                }
 
-                               return new Suspect(new Date(diff), max, attempts, tuples.get(0).rhost, tuples.get(0).user);
+                               return new Suspect(new Date(diff), max, attempts, window.get(0).rhost, window.get(0).user);
                            }
                        }, Suspect.class);
     }

@@ -1,6 +1,7 @@
 package streamsx.demo.logwatch.topology;
 
-import java.io.File;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -19,12 +20,13 @@ public class TextFileSink<T> implements Consumer<T> {
     public void accept(T tuple) {
         if (!initialized) {
             try {
-                writer = new PrintWriter(fileName, "UTF-8");
+                writer = new PrintWriter(new BufferedWriter(new FileWriter(fileName)));
             } catch (Exception e) {
                 System.out.println("Caught exception: " + e.toString());
             }
             initialized = true;
         }
         writer.println(tuple);
+        writer.flush();
     }
 }

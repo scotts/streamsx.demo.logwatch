@@ -2,6 +2,8 @@ package streamsx.demo.logwatch.topology;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -18,9 +20,9 @@ public class LogWatch {
     public static void main(String[] args) throws Exception {
         String contextType = args[0];
         String messagesFile = args[1];
-        String suspectsFile = args[2];
-        TStream<Suspect> suspects = createLogWatchTopology(messagesFile, suspectsFile);
-        StreamsContextFactory.getStreamsContext(contextType).submit(suspects.topology()).get();
+        String breakinsFile = args[2];
+        TStream<Breakin> breakins = createLogWatchTopology(messagesFile, breakinsFile);
+        StreamsContextFactory.getStreamsContext(contextType).submit(breakins.topology()).get();
     }
     
     public static class LogLine {
@@ -41,7 +43,7 @@ public class LogWatch {
         }
     }
 
-    public static TStream<Suspect> createLogWatchTopology(String messagesFile, String suspectsFile) {
+    public static TStream<Breakin> createLogWatchTopology(String messagesFile, String breakinsFile) {
         Topology topology = new Topology("LogWatch");
 
         TStream<String> messagesFileName = topology.strings(messagesFile);
@@ -88,7 +90,26 @@ public class LogWatch {
         }, Failure.class);
 
         TStream<Suspect> suspects = SuspectFinder.find(failures, 5, 60);
-        suspects.sink(new TextFileSink<Suspect>(suspectsFile));
-        return suspects; 
+
+        TStream<LogLine> rawSuccesses = parsedLines.filter(new Predicate<LogLine>() {
+            @Override
+            public boolean test(LogLine tuple) {
+                return tuple.service.contains("sshd") && tuple.message.contains("session opened for user");
+            }
+        });
+
+        TStream<Success> successes = rawSuccesses.transform(new Function<LogLine, Success>() {
+            @Override
+            public Success apply(LogLine tuple) {
+                Matcher matcher = Pattern.compile("user (\\w+) by").matcher(tuple.message);
+                matcher.find();
+                return new Success(tuple.time, matcher.group(1));
+            }
+        }, Success.class);
+
+        TStream<Breakin> breakins = DeterministicJoin.join(suspects, successes);
+        breakins.sink(new TextFileSink<Breakin>(breakinsFile));
+
+        return breakins; 
     }
 }

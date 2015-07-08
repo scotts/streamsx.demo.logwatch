@@ -4,7 +4,7 @@ import java.util.Date;
 
 import com.ibm.streamsx.topology.tuple.Keyable;
 
-public class Failure implements Keyable<String>, Comparable<Failure> {
+public class Failure implements Comparable<Failure>, Keyable<String> {
     public final Date time;
     public final String uid;
     public final String euid;
@@ -27,13 +27,13 @@ public class Failure implements Keyable<String>, Comparable<Failure> {
     }
 
     @Override
-    public String getKey() {
-        return rhost;
+    public int compareTo(Failure other) {
+        return this.time.compareTo(other.time);
     }
 
     @Override
-    public int compareTo(Failure other) {
-        return this.time.compareTo(other.time);
+    public String getKey() {
+        return this.rhost;
     }
 }
 

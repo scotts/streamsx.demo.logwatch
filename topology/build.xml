@@ -38,10 +38,11 @@
     </target>
 
     <target name="run" depends="jar">
+        <gunzip src="${user.dir}/data/messages_broken.gz" dest="${user.dir}/data/messages_broken"/>
         <java classname="streamsx.demo.logwatch.topology.LogWatch" classpathref="run.classpath" fork="yes">
             <arg value="STANDALONE"/>
-            <arg value="${user.dir}/data/messages_head"/>
-            <arg value="${user.dir}/data/suspects.txt"/>
+            <arg value="${user.dir}/data/messages_broken"/>
+            <arg value="${user.dir}/data/breakins.txt"/>
         </java>
     </target>
  
@@ -50,5 +51,6 @@
         <delete dir="${lib}"/>
         <delete file="${jarname}"/>
         <delete file="streamsx.demo.logwatch.topology.LogWatch.sab"/>
+        <delete file="${user.dir}/data/messages_broken"/>
     </target>
 </project>
